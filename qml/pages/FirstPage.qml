@@ -9,8 +9,18 @@ Page {
 
     // SQL functions
     function insert_event(timestamp, event) {
-        console.log("insert_event function called")
-        //screentime.db.transaction()
+        // Convert event from str to int
+        var eventInt
+        switch(event) {
+            case "off":
+                eventInt = 0
+                break
+            case "on":
+                eventInt = 1
+                break
+        }
+        console.log("eventInt: ", eventInt)
+	//screentime.db.transaction()
     }
 
     // To enable PullDownMenu, place our content in a SilicaFlickable
@@ -41,8 +51,9 @@ Page {
 
             onTriggered: {
                 mce.typedCall('get_display_status', [], function (result) {
-                            console.log('D-Bus call result:', result);
-                        });
+                    console.log('D-Bus call result:', result);
+                    insert_event(1, result);
+                });
             }
         }
 
