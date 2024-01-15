@@ -9,9 +9,8 @@ Page {
 
     // SQL functions
     function insert_event(timestamp, event) {
-        property int on: 1
-        property int off:2
-        screentime.db.transaction()
+        console.log("insert_event function called")
+        //screentime.db.transaction()
     }
 
     // To enable PullDownMenu, place our content in a SilicaFlickable
