@@ -17,6 +17,31 @@ function initializeDatabase() {
     );
 }
 
+function getLatestEvent() {
+    var latestValue;
+    db.transaction(
+        function(tx) {
+            var result = tx.executeSql('SELECT powered FROM events ORDER BY timestamp DESC LIMIT 1');
+            latestValue = result.rows.item(0).powered;
+        }
+    );
+    return latestValue;
+}
+
+function insertEvent(timestamp, event) {
+    // Convert event from str to int
+    var eventInt
+    switch(event) {
+        case "off":
+            eventInt = 0
+            break
+        case "on":
+            eventInt = 1
+            break
+    }
+    console.log("eventInt: ", eventInt)
+}
+
 function getDatabase() {
     return db;
 }

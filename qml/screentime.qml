@@ -2,7 +2,7 @@ import QtQuick 2.0
 import QtQuick.LocalStorage 2.0
 import Sailfish.Silica 1.0
 import "pages"
-import "database.js" as DBHandler
+import "database.js" as DB
 
 ApplicationWindow {
     id: screentime
@@ -20,6 +20,6 @@ ApplicationWindow {
         // Init straight away QtQuick.LocalStorage?
         // No need to check paths or anything?
         // https://doc.qt.io/qt-5/qtquick-localstorage-qmlmodule.html
-        DBHandler.initializeDatabase();
+        DB.initializeDatabase();
     }
 }

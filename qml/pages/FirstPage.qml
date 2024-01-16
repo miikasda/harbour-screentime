@@ -2,40 +2,13 @@ import QtQuick 2.0
 import Nemo.DBus 2.0
 import Sailfish.Silica 1.0
 import QtQuick.LocalStorage 2.0
-import "../database.js" as DBHandler
+import "../database.js" as DB
 
 Page {
     id: page
 
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
     allowedOrientations: Orientation.All
-
-    // SQL functions
-    function insert_event(timestamp, event) {
-        // Convert event from str to int
-        var eventInt
-        switch(event) {
-            case "off":
-                eventInt = 0
-                break
-            case "on":
-                eventInt = 1
-                break
-        }
-        console.log("eventInt: ", eventInt)
-	//screentime.db.transaction()
-    }
-    function latest_event() {
-        var db = DBHandler.getDatabase();
-        var latestValue;
-        db.transaction(
-            function(tx) {
-                var result = tx.executeSql('SELECT powered FROM events ORDER BY timestamp DESC LIMIT 1');
-                latestValue = result.rows.item(0).powered;
-            }
-        );
-        return latestValue;
-    }
 
     // To enable PullDownMenu, place our content in a SilicaFlickable
     SilicaFlickable {
@@ -66,9 +39,9 @@ Page {
             onTriggered: {
                 mce.typedCall('get_display_status', [], function (result) {
                     console.log('D-Bus call result:', result);
-                    var latestEvent = latest_event();
+                    var latestEvent = DB.getLatestEvent();
                     console.log("Latest:", latestEvent);
-                    insert_event(1, result);
+                    DB.insertEvent(1, result);
                 });
             }
         }
