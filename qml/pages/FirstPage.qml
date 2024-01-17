@@ -7,6 +7,8 @@ import "../database.js" as DB
 Page {
     id: page
 
+    property var displayStatus: "on"
+
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
     allowedOrientations: Orientation.All
 
@@ -39,9 +41,12 @@ Page {
             onTriggered: {
                 mce.typedCall('get_display_status', [], function (result) {
                     console.log('D-Bus call result:', result);
-                    var latestEvent = DB.getLatestEvent();
-                    console.log("Latest:", latestEvent);
-                    DB.insertEvent(1, result);
+                    //var latestEvent = DB.getLatestEvent();
+                    console.log("Latest:", displayStatus);
+                    if(displayStatus != result){
+                        DB.insertEvent(1, result);
+                        displayStatus = result;
+                    }
                 });
             }
         }

@@ -6,6 +6,7 @@ function initializeDatabase() {
             tx.executeSql('CREATE TABLE IF NOT EXISTS events(timestamp INT, powered INT)');
             var result = tx.executeSql('SELECT COUNT(*) AS count FROM events');
             var rowCount = result.rows.item(0).count;
+            // TODO we should allways append display on status when the app is lauched
             if (rowCount === 0) {
                 console.log("The table is empty, initializing..");
                 var currentTimestamp = new Date().getTime();
@@ -17,6 +18,7 @@ function initializeDatabase() {
     );
 }
 
+// TODO Currently not used, remove if there doesnt become new usecases
 function getLatestEvent() {
     var latestValue;
     db.transaction(
