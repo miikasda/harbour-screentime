@@ -12,6 +12,11 @@ Page {
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
     allowedOrientations: Orientation.All
 
+    // Init the time label
+    Component.onCompleted: {
+        timeOnLabel.text = DB.getScreenOnTime()
+    }
+
     // To enable PullDownMenu, place our content in a SilicaFlickable
     SilicaFlickable {
         anchors.fill: parent
@@ -46,7 +51,16 @@ Page {
                         displayStatus = result;
                     }
                 });
-                console.log("Seconds that screen has been on:", DB.getScreenOnTime())
+            }
+        }
+
+        // Update the screen on time every minute
+        Timer {
+            interval: 60000
+            repeat: true
+            running: true
+            onTriggered: {
+                timeOnLabel.text = DB.getScreenOnTime();
             }
         }
 
@@ -61,14 +75,21 @@ Page {
             width: page.width
             spacing: Theme.paddingLarge
             PageHeader {
-                title: qsTr("UI Template")
+                title: "Screen time"
             }
             Label {
                 x: Theme.horizontalPageMargin
-                text: qsTr("Hello Sailors")
+                text: "HH:MM"
                 color: Theme.secondaryHighlightColor
                 font.pixelSize: Theme.fontSizeExtraLarge
             }
+            Label {
+               id: timeOnLabel
+               x: Theme.horizontalPageMargin
+               color: Theme.secondaryHighlightColor
+               font.pixelSize: Theme.fontSizeExtraLarge
+               text: "00:00"
+           }
         }
     }
 }

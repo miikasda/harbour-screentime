@@ -57,7 +57,14 @@ function getScreenOnTime() {
     if (latestValues[1] === 1) {
         screenOnTime = screenOnTime + ((new Date().getTime() - latestValues[0]) / 1000);
     }
-    return screenOnTime.toFixed();
+    // screenOnTime is currently in seconds, return as HH:MM:SS string
+    screenOnTime = screenOnTime.toFixed();
+    var hours = Math.floor(screenOnTime / 3600);
+    var minutes = Math.floor((screenOnTime % 3600) / 60);
+    // Add Leading zeros
+    var formattedHours = hours < 10 ? "0" + hours : hours;
+    var formattedMinutes = minutes < 10 ? "0" + minutes : minutes;
+    return formattedHours + ":" + formattedMinutes;
 }
 
 function insertEvent(event) {
