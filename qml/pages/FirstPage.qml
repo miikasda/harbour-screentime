@@ -7,7 +7,7 @@ import "../database.js" as DB
 Page {
     id: page
 
-    property var displayStatus: "on"
+    property string displayStatus: "on"
 
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
     allowedOrientations: Orientation.All
@@ -46,6 +46,7 @@ Page {
                         displayStatus = result;
                     }
                 });
+                console.log("Seconds that screen has been on:", DB.getScreenOnTime())
             }
         }
 
