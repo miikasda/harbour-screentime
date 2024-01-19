@@ -6,7 +6,7 @@ import "../database.js" as DB
 CoverBackground {
     // Init the time label
     Component.onCompleted: {
-        timeOnLabel.text = DB.getScreenOnTime();
+        timeOnLabel.text = DB.getScreenOnTime(new Date());
     }
     // Update the screen on time every minute
     Timer {
@@ -14,7 +14,7 @@ CoverBackground {
         repeat: true
         running: true
         onTriggered: {
-            timeOnLabel.text = DB.getScreenOnTime();
+            timeOnLabel.text = DB.getScreenOnTime(new Date());
         }
     }
 
@@ -22,6 +22,11 @@ CoverBackground {
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
         text: "Screen time"
+    }
+    Label {
+        anchors.bottom: timeOnLabel.top
+        anchors.horizontalCenter: parent.horizontalCenter
+        text: "Today"
     }
     Label {
         id: timeOnLabel

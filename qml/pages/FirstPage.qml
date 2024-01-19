@@ -14,7 +14,7 @@ Page {
 
     // Init the time label
     Component.onCompleted: {
-        timeOnLabel.text = DB.getScreenOnTime()
+        timeOnLabel.text = DB.getScreenOnTime(new Date())
     }
 
     // To enable PullDownMenu, place our content in a SilicaFlickable
@@ -62,7 +62,7 @@ Page {
             repeat: true
             running: true
             onTriggered: {
-                timeOnLabel.text = DB.getScreenOnTime();
+                timeOnLabel.text = DB.getScreenOnTime(new Date());
             }
         }
 
@@ -77,7 +77,7 @@ Page {
             width: page.width
             spacing: Theme.paddingLarge
             PageHeader {
-                title: "Screen time"
+                title: "Screen time today"
             }
             Label {
                 x: Theme.horizontalPageMargin

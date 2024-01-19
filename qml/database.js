@@ -28,8 +28,9 @@ function getLatestEvent() {
     return [latestTimestamp, latestValue];
 }
 
-function getScreenOnTime() {
+function getScreenOnTime(date) {
     var screenOnTime;
+    date.setHours(0, 0, 0, 0);
     db.transaction(
         function(tx) {
             var result = tx.executeSql('\
@@ -42,18 +43,22 @@ function getScreenOnTime() {
                             FROM events \
                             WHERE powered = 0 \
                             AND timestamp <= e.timestamp \
+                            AND timestamp >= ? \
                         ) - \
                         ( \
                             SELECT MAX(timestamp) \
                             FROM events \
                             WHERE powered = 1 \
                             AND timestamp <= e.timestamp \
+                            AND timestamp >= ? \
                         ) as durations \
                     FROM \
                         events e \
                     WHERE \
                         powered = 0 \
-                )'
+                        AND timestamp >= ? \
+                )',
+                [date.getTime(), date.getTime(), date.getTime()]
             );
             screenOnTime = result.rows.item(0).total_screen_on;
         }
