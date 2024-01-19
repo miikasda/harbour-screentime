@@ -46,9 +46,11 @@ Page {
             onTriggered: {
                 mce.typedCall('get_display_status', [], function (result) {
                     if(displayStatus !== result){
-                        console.log('Display status changed to', result);
-                        DB.insertEvent(result);
-                        displayStatus = result;
+                        if (result !== "dimmed") {
+                            console.log('Display status changed to', result);
+                            DB.insertEvent(result);
+                            displayStatus = result;
+                        }
                     }
                 });
             }
