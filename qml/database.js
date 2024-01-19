@@ -4,16 +4,8 @@ function initializeDatabase() {
     db.transaction(
         function(tx) {
             tx.executeSql('CREATE TABLE IF NOT EXISTS events(timestamp INT, powered INT)');
-            var result = tx.executeSql('SELECT COUNT(*) AS count FROM events');
-            var rowCount = result.rows.item(0).count;
-            // TODO we should allways append display on status when the app is lauched
-            if (rowCount === 0) {
-                console.log("The table is empty, initializing..");
-                var currentTimestamp = new Date().getTime();
-                tx.executeSql('INSERT INTO events(timestamp, powered) VALUES (?, ?)', [currentTimestamp, 1]);
-            } else {
-                console.log("The table is not empty, rows: ", rowCount);
-            }
+            var timestamp = new Date().getTime();
+            tx.executeSql('INSERT INTO events(timestamp, powered) VALUES (?, ?)', [timestamp, 1]);
         }
     );
 }
@@ -30,7 +22,7 @@ function getLatestEvent() {
     return latestValue;
 }
 
-function insertEvent(timestamp, event) {
+function insertEvent(event) {
     // Convert event from str to int
     var eventInt
     switch(event) {
@@ -41,7 +33,12 @@ function insertEvent(timestamp, event) {
             eventInt = 1
             break
     }
-    console.log("eventInt: ", eventInt)
+    db.transaction(
+        function(tx) {
+            var timestamp = new Date().getTime();
+            tx.executeSql('INSERT INTO events(timestamp, powered) VALUES (?, ?)', [timestamp, eventInt]);
+        }
+    );
 }
 
 function getDatabase() {

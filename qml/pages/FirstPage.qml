@@ -40,11 +40,9 @@ Page {
 
             onTriggered: {
                 mce.typedCall('get_display_status', [], function (result) {
-                    console.log('D-Bus call result:', result);
-                    //var latestEvent = DB.getLatestEvent();
-                    console.log("Latest:", displayStatus);
-                    if(displayStatus != result){
-                        DB.insertEvent(1, result);
+                    if(displayStatus !== result){
+                        console.log('Display status changed to', result);
+                        DB.insertEvent(result);
                         displayStatus = result;
                     }
                 });

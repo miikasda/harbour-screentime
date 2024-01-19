@@ -22,4 +22,9 @@ ApplicationWindow {
         // https://doc.qt.io/qt-5/qtquick-localstorage-qmlmodule.html
         DB.initializeDatabase();
     }
+
+    Component.onDestruction: {
+        console.log("Application closing");
+        DB.insertEvent("off");
+    }
 }
