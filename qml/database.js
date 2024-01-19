@@ -7,6 +7,7 @@ function initializeDatabase() {
             insertEvent("on")
         }
     );
+    console.log("Initialized database")
 }
 
 function getLatestEvent() {
@@ -15,8 +16,13 @@ function getLatestEvent() {
     db.transaction(
         function(tx) {
             var result = tx.executeSql('SELECT timestamp, powered FROM events ORDER BY timestamp DESC LIMIT 1');
-            latestTimestamp = result.rows.item(0).timestamp;
-            latestValue = result.rows.item(0).powered;
+            if (result.rows.length > 0) {
+                latestTimestamp = result.rows.item(0).timestamp;
+                latestValue = result.rows.item(0).powered;
+            } else {
+                latestTimestamp = "emptydb"
+                latestValue = "emptydb"
+            }
         }
     );
     return [latestTimestamp, latestValue];
