@@ -12,14 +12,14 @@ Page {
         model: 20
         anchors.fill: parent
         header: PageHeader {
-            title: qsTr("Nested Page")
+            title: "Nested Page"
         }
         delegate: BackgroundItem {
             id: delegate
 
             Label {
                 x: Theme.horizontalPageMargin
-                text: qsTr("Item") + " " + index
+                text: "Item" + " " + index
                 anchors.verticalCenter: parent.verticalCenter
                 color: delegate.highlighted ? Theme.highlightColor : Theme.primaryColor
             }

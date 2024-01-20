@@ -24,7 +24,7 @@ Page {
         // PullDownMenu and PushUpMenu must be declared in SilicaFlickable, SilicaListView or SilicaGridView
         PullDownMenu {
             MenuItem {
-                text: qsTr("Show Page 2")
+                text: "Show Page 2"
                 onClicked: pageStack.animatorPush(Qt.resolvedUrl("SecondPage.qml"))
             }
         }
