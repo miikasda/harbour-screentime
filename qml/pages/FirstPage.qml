@@ -46,7 +46,7 @@ Page {
             onTriggered: {
                 mce.typedCall('get_display_status', [], function (result) {
                     if(displayStatus !== result){
-                        if (result !== "dimmed") {
+                        if (result === "on" || result === "off") {
                             console.log('Display status changed to', result);
                             DB.insertEvent(result);
                             displayStatus = result;
