@@ -91,7 +91,7 @@ function insertEvent(event) {
     }
     // Only insert if current event is other than the latest in DB
     var latestEvent = getLatestEvent()[1];
-    if (latestEvent !== event) {
+    if (latestEvent !== eventInt) {
         db.transaction(
             function(tx) {
                 var timestamp = new Date().getTime();
