@@ -12,9 +12,10 @@ Page {
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
     allowedOrientations: Orientation.All
 
-    // Init the time label
+    // Init the time labels
     Component.onCompleted: {
-        timeOnLabel.text = DB.getScreenOnTime(new Date())
+        timeOnLabel.value = DB.getScreenOnTime(new Date())
+        timeOnAvgLabel.value = DB.getAverageScreenOnTime(new Date());
     }
 
     // To enable PullDownMenu, place our content in a SilicaFlickable
@@ -62,7 +63,13 @@ Page {
             repeat: true
             running: true
             onTriggered: {
-                timeOnLabel.text = DB.getScreenOnTime(new Date());
+                timeOnLabel.value = DB.getScreenOnTime(new Date());
+                // Update the previous 7 day average if it's midnight
+                var now = new Date();
+                if (now.getHours() === 0 && now.getMinutes() === 0) {
+                    console.log("Midnight, recalculating average.");
+                    timeOnAvgLabel.value = DB.getAverageScreenOnTime(new Date());
+                }
             }
         }
 
@@ -75,23 +82,23 @@ Page {
             id: column
 
             width: page.width
-            spacing: Theme.paddingLarge
+            spacing: Theme.paddingMedium
             PageHeader {
-                title: "Screen time today"
+                title: "Screen time"
             }
-            Label {
-                x: Theme.horizontalPageMargin
-                text: "HH:MM"
-                color: Theme.secondaryHighlightColor
-                font.pixelSize: Theme.fontSizeExtraLarge
+            SectionHeader {
+                text: "Durations (HH:MM)"
             }
-            Label {
+            DetailItem {
                id: timeOnLabel
-               x: Theme.horizontalPageMargin
-               color: Theme.secondaryHighlightColor
-               font.pixelSize: Theme.fontSizeExtraLarge
-               text: "00:00"
-           }
+               label: "Screen on today"
+               value: "00:00"
+            }
+            DetailItem {
+               id: timeOnAvgLabel
+               label: "7 previous days average"
+               value: "00:00"
+            }
         }
     }
 }
