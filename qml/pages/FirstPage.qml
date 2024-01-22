@@ -1,17 +1,21 @@
 import QtQuick 2.0
 import Nemo.DBus 2.0
 import Sailfish.Silica 1.0
+import QtQuick.LocalStorage 2.0
+import "../database.js" as DB
+
 Page {
     id: page
+
+    property string displayStatus: "on"
 
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
     allowedOrientations: Orientation.All
 
-    // SQL functions
-    function insert_event(timestamp, event) {
-        property int on: 1
-        property int off:2
-        screentime.db.transaction()
+    // Init the time labels
+    Component.onCompleted: {
+        timeOnLabel.value = DB.getScreenOnTime(new Date())
+        timeOnAvgLabel.value = DB.getAverageScreenOnTime(new Date());
     }
 
     // To enable PullDownMenu, place our content in a SilicaFlickable
@@ -21,7 +25,7 @@ Page {
         // PullDownMenu and PushUpMenu must be declared in SilicaFlickable, SilicaListView or SilicaGridView
         PullDownMenu {
             MenuItem {
-                text: qsTr("Show Page 2")
+                text: "Show Page 2"
                 onClicked: pageStack.animatorPush(Qt.resolvedUrl("SecondPage.qml"))
             }
         }
@@ -42,8 +46,30 @@ Page {
 
             onTriggered: {
                 mce.typedCall('get_display_status', [], function (result) {
-                            console.log('D-Bus call result:', result);
-                        });
+                    if(displayStatus !== result){
+                        if (result === "on" || result === "off") {
+                            console.log('Display status changed to', result);
+                            DB.insertEvent(result);
+                            displayStatus = result;
+                        }
+                    }
+                });
+            }
+        }
+
+        // Update the screen on time every minute
+        Timer {
+            interval: 60000
+            repeat: true
+            running: true
+            onTriggered: {
+                timeOnLabel.value = DB.getScreenOnTime(new Date());
+                // Update the previous 7 day average if it's midnight
+                var now = new Date();
+                if (now.getHours() === 0 && now.getMinutes() === 0) {
+                    console.log("Midnight, recalculating average.");
+                    timeOnAvgLabel.value = DB.getAverageScreenOnTime(new Date());
+                }
             }
         }
 
@@ -56,15 +82,22 @@ Page {
             id: column
 
             width: page.width
-            spacing: Theme.paddingLarge
+            spacing: Theme.paddingMedium
             PageHeader {
-                title: qsTr("UI Template")
+                title: "Screen time"
             }
-            Label {
-                x: Theme.horizontalPageMargin
-                text: qsTr("Hello Sailors")
-                color: Theme.secondaryHighlightColor
-                font.pixelSize: Theme.fontSizeExtraLarge
+            SectionHeader {
+                text: "Durations (HH:MM)"
+            }
+            DetailItem {
+               id: timeOnLabel
+               label: "Screen on today"
+               value: "00:00"
+            }
+            DetailItem {
+               id: timeOnAvgLabel
+               label: "7 previous days average"
+               value: "00:00"
             }
         }
     }
