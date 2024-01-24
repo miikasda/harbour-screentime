@@ -110,8 +110,12 @@ function getAverageScreenOnTime(date) {
             numberOfDays++;
         }
     }
-    var averageScreenOnTime = totalScreenOnTime / numberOfDays;
-    return secondsToString(averageScreenOnTime);
+    if (numberOfDays === 0) {
+        return "Not enough data";
+    } else {
+        var averageScreenOnTime = totalScreenOnTime / numberOfDays;
+        return secondsToString(averageScreenOnTime);
+    }
 }
 
 function insertEvent(event) {

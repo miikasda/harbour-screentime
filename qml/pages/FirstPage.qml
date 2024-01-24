@@ -12,8 +12,9 @@ Page {
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
     allowedOrientations: Orientation.All
 
-    // Init the time labels
+    // Init the database and time labels
     Component.onCompleted: {
+        DB.initializeDatabase()
         timeOnLabel.value = DB.getScreenOnTime(new Date())
         timeOnAvgLabel.value = DB.getAverageScreenOnTime(new Date());
     }
