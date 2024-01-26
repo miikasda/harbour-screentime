@@ -79,7 +79,10 @@ function getScreenOnTime(date) {
     // If the screen is now on, and we are calculating for today we need to add time from start of this session to now
     var latestValues = getLatestEvent()
     if (latestValues[1] === 1 && date.getTime() === new Date().setHours(0, 0, 0, 0)) {
-        screenOnTime = screenOnTime + ((new Date().getTime() - latestValues[0]) / 1000);
+        // Cap session length to max todays length and add it to summed earlier sessions
+        var now = new Date().getTime()
+        var currSessionLength = Math.min((now-date.getTime()), (now-latestValues[0]));
+        screenOnTime = screenOnTime + (currSessionLength / 1000);
     }
     // screenOnTime is currently in seconds, return as HH:MM:SS string
     if (screenOnTime == null) {
