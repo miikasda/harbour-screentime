@@ -40,6 +40,58 @@ function getLatestEvent() {
     return [latestTimestamp, latestValue];
 }
 
+function getFirstEventOfDay(date) {
+    var firstEventTimestamp;
+    var firstEventPowered;
+    db.transaction(
+        function(tx) {
+            var result = tx.executeSql('\
+                SELECT timestamp, powered \
+                FROM events \
+                WHERE timestamp >= ? \
+                AND timestamp < ? + 86400000 \
+                ORDER BY timestamp ASC \
+                LIMIT 1',
+                [date.getTime(), date.getTime()]
+            );
+            if (result.rows.length > 0) {
+                firstEventTimestamp = result.rows.item(0).timestamp;
+                firstEventPowered = result.rows.item(0).powered;
+            } else {
+                firstEventTimestamp = "emptydb";
+                firstEventPowered = "emptydb";
+            }
+        }
+    );
+    return [firstEventTimestamp, firstEventPowered];
+}
+
+function getLastEventForDay(date) {
+    var lastEventTimestamp;
+    var lastEventPowered;
+    db.transaction(
+        function(tx) {
+            var result = tx.executeSql('\
+                SELECT timestamp, powered \
+                FROM events \
+                WHERE timestamp >= ? \
+                AND timestamp < ? + 86400000 \
+                ORDER BY timestamp DESC \
+                LIMIT 1',
+                [date.getTime(), date.getTime()]
+            );
+            if (result.rows.length > 0) {
+                lastEventTimestamp = result.rows.item(0).timestamp;
+                lastEventPowered = result.rows.item(0).powered;
+            } else {
+                lastEventTimestamp = "emptydb";
+                lastEventPowered = "emptydb";
+            }
+        }
+    );
+    return [lastEventTimestamp, lastEventPowered];
+}
+
 function getScreenOnTime(date) {
     var screenOnTime = null;
     date.setHours(0, 0, 0, 0);
@@ -83,6 +135,20 @@ function getScreenOnTime(date) {
         var now = new Date().getTime()
         var currSessionLength = Math.min((now-date.getTime()), (now-latestValues[0]));
         screenOnTime = screenOnTime + (currSessionLength / 1000);
+    }
+    // If the last event for day has been "on", and the day is not today,
+    // we need to add duration from that untill midnight
+    var lastEventForDay = getLastEventForDay(date);
+    if (lastEventForDay[1] === 1 && date.getTime() !== new Date().setHours(0, 0, 0, 0)) {
+        var midnight = date.getTime() + 86400000; // Next day midnight
+        var durationUntilMidnight = midnight - lastEventForDay[0];
+        screenOnTime = screenOnTime + (durationUntilMidnight / 1000);
+    }
+    // Add seconds from the start of the day to the first event of the day if the first event has been "off"
+    var firstEventOfDay = getFirstEventOfDay(date);
+    if (firstEventOfDay[1] === 0) {
+        var startOfDayToFirstEvent = firstEventOfDay[0] - date.getTime();
+        screenOnTime = screenOnTime + (startOfDayToFirstEvent / 1000);
     }
     // screenOnTime is currently in seconds, return as HH:MM:SS string
     if (screenOnTime == null) {
