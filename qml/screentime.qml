@@ -10,19 +10,6 @@ ApplicationWindow {
     cover: Qt.resolvedUrl("cover/CoverPage.qml")
     allowedOrientations: defaultAllowedOrientations
 
-    // Initialization of database
-    Component.onCompleted: {
-        console.log("Application launched. Performing initialization...");
-        // Check that app folder exists
-        var appFolder = StandardPaths.data;
-        console.log('Appfolder:', appFolder);
-        // Init database
-        // Init straight away QtQuick.LocalStorage?
-        // No need to check paths or anything?
-        // https://doc.qt.io/qt-5/qtquick-localstorage-qmlmodule.html
-        DB.initializeDatabase();
-    }
-
     Component.onDestruction: {
         console.log("Application closing");
         DB.insertEvent("off");

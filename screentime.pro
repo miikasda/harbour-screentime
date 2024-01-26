@@ -17,6 +17,8 @@ CONFIG += sailfishapp_qml
 DISTFILES += qml/screentime.qml \
     qml/cover/CoverPage.qml \
     qml/database.js \
+    qml/qmldir \
+    qml/LabelData.qml \
     qml/pages/FirstPage.qml \
     qml/pages/SecondPage.qml \
     rpm/screentime.changes.in \

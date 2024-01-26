@@ -3,6 +3,7 @@ import Nemo.DBus 2.0
 import Sailfish.Silica 1.0
 import QtQuick.LocalStorage 2.0
 import "../database.js" as DB
+import ".."
 
 Page {
     id: page
@@ -12,10 +13,11 @@ Page {
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
     allowedOrientations: Orientation.All
 
-    // Init the time labels
+    // Init the database and time labels
     Component.onCompleted: {
-        timeOnLabel.value = DB.getScreenOnTime(new Date())
-        timeOnAvgLabel.value = DB.getAverageScreenOnTime(new Date());
+        DB.initializeDatabase()
+        LabelData.screenOnToday = DB.getScreenOnTime(new Date())
+        LabelData.weeklyAvg = DB.getAverageScreenOnTime(new Date());
     }
 
     // To enable PullDownMenu, place our content in a SilicaFlickable
@@ -63,12 +65,12 @@ Page {
             repeat: true
             running: true
             onTriggered: {
-                timeOnLabel.value = DB.getScreenOnTime(new Date());
+                LabelData.screenOnToday = DB.getScreenOnTime(new Date());
                 // Update the previous 7 day average if it's midnight
                 var now = new Date();
                 if (now.getHours() === 0 && now.getMinutes() === 0) {
                     console.log("Midnight, recalculating average.");
-                    timeOnAvgLabel.value = DB.getAverageScreenOnTime(new Date());
+                    LabelData.weeklyAvg = DB.getAverageScreenOnTime(new Date());
                 }
             }
         }
@@ -92,12 +94,12 @@ Page {
             DetailItem {
                id: timeOnLabel
                label: "Screen on today"
-               value: "00:00"
+               value: LabelData.screenOnToday
             }
             DetailItem {
                id: timeOnAvgLabel
                label: "7 previous days average"
-               value: "00:00"
+               value: LabelData.weeklyAvg
             }
         }
     }
