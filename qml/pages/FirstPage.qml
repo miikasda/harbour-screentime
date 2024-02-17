@@ -9,6 +9,7 @@ Page {
     id: page
 
     property string displayStatus: "on"
+    property string avgUpdated: new Date().toDateString()
 
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
     allowedOrientations: Orientation.All
@@ -65,12 +66,13 @@ Page {
             repeat: true
             running: true
             onTriggered: {
-                LabelData.screenOnToday = DB.getScreenOnTime(new Date());
-                // Update the previous 7 day average if it's midnight
                 var now = new Date();
-                if (now.getHours() === 0 && now.getMinutes() === 0) {
-                    console.log("Midnight, recalculating average.");
-                    LabelData.weeklyAvg = DB.getAverageScreenOnTime(new Date());
+                LabelData.screenOnToday = DB.getScreenOnTime(now);
+                // Update the previous 7 day average if the day has changed
+                if (now.toDateString() !== avgUpdated) {
+                    console.log("Day changed, recalculating average");
+                    avgUpdated = now.toDateString();
+                    LabelData.weeklyAvg = DB.getAverageScreenOnTime(now);
                 }
             }
         }
