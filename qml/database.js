@@ -4,10 +4,17 @@ function initializeDatabase() {
     db.transaction(
         function(tx) {
             tx.executeSql('CREATE TABLE IF NOT EXISTS events(timestamp INT, powered INT)');
-            insertEvent("on")
         }
     );
-    console.log("Initialized database")
+    // Check if the latest event is "on" when initializing DB
+    // This means the app has not closed succesfully last time and we need to fix the DB
+    var latestValues = getLatestEvent();
+    if (latestValues[1] === 1) {
+        console.log("App has not closed succesfully last time, removing the last entry");
+        removeEvent(latestValues[0]);
+    }
+    insertEvent("on");
+    console.log("Initialized database");
 }
 
 function secondsToString(seconds) {
@@ -208,6 +215,14 @@ function insertEvent(event) {
             }
         );
     }
+}
+
+function removeEvent(timestamp) {
+    db.transaction(
+        function(tx) {
+            tx.executeSql('DELETE FROM events WHERE timestamp = ?', [timestamp]);
+        }
+    );
 }
 
 function getDatabase() {
