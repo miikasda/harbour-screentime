@@ -194,6 +194,43 @@ function getAverageScreenOnTime(date) {
     }
 }
 
+function getData(date) {
+    var data = [];
+
+    var startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    var endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    db.transaction(
+        function(tx) {
+            var result = tx.executeSql('SELECT timestamp, powered FROM events WHERE timestamp >= ? AND timestamp <= ?',
+                [startOfDay.getTime(), endOfDay.getTime()]
+            );
+
+            if (result.rows.length > 0) {
+                for (var i = 0; i < result.rows.length; i++) {
+                    var item = result.rows.item(i);
+                    // Convert milliseconds to seconds by dividing by 1000
+                    var timestampInSeconds = item.timestamp / 1000;
+                    var dataPoint = {
+                        x: timestampInSeconds, // Use seconds
+                        y: item.powered
+                    };
+                    data.push(dataPoint);
+                }
+            } else {
+                console.log("No results found");
+            }
+        },
+        function(error) {
+            console.error("Error executing SQL query: ", error.message);
+        }
+    );
+
+    return data;
+}
+
 function insertEvent(event) {
     // Convert event from str to int
     var eventInt
