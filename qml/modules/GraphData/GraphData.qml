@@ -241,26 +241,27 @@ Item {
                     ctx.lineWidth = lineWidth;
                     ctx.beginPath();
 
-                    var value = points[0].y;
-                    var startY = height - Math.floor((value - minY) / stepY) - 1;
+                    var startX = Math.floor((points[0].x - minX) / (maxX - minX) * width);
+                    var startY = height - Math.floor((points[0].y - minY) / stepY) - 1;
 
-                    for (var i = 0; i < points.length; i++) {
+                    for (var i = 1; i < points.length; i++) {
                         var point = points[i];
-                        var startX = Math.floor((point.x - minX) / (maxX - minX) * width);
-                        var endX = i < points.length - 1 ? Math.floor((points[i + 1].x - minX) / (maxX - minX) * width) : width;
+                        var endX = Math.floor((point.x - minX) / (maxX - minX) * width);
                         var endY = height - Math.floor((point.y - minY) / stepY) - 1;
 
-                        // Draw horizontal line at the current value
+                        // Draw line segment from previous point to current point
                         ctx.moveTo(startX, startY);
                         ctx.lineTo(endX, startY);
                         ctx.stroke();
 
-                        // Draw vertical line to the next data point
+                        // Draw line segment at the current value level
                         ctx.moveTo(endX, startY);
                         ctx.lineTo(endX, endY);
                         ctx.stroke();
 
-                        startY = endY; // Update startY for the next data point
+                        // Update start coordinates for the next segment
+                        startX = endX;
+                        startY = endY;
                     }
 
                     ctx.restore();
