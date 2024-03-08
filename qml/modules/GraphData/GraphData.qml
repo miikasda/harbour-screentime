@@ -230,40 +230,45 @@ Item {
                 onPaint: {
                     var ctx = canvas.getContext("2d");
                     ctx.globalCompositeOperation = "source-over";
-                    ctx.clearRect(0, 0, width, height);
+                    ctx.clearRect(0,0,width,height);
 
-                    // Draw grid lines
-                    drawGrid(ctx);
+                    //console.log("maxY", maxY, "minY", minY, "height", height, "StepY", stepY);
 
-                    // Draw data points
-                    ctx.save();
-                    ctx.strokeStyle = lineColor;
-                    ctx.lineWidth = lineWidth;
-                    ctx.beginPath();
+                    var end = points.length;
 
-                    var value = points[0].y;
-                    var startY = height - Math.floor((value - minY) / stepY) - 1;
-
-                    for (var i = 0; i < points.length; i++) {
-                        var point = points[i];
-                        var startX = Math.floor((point.x - minX) / (maxX - minX) * width);
-                        var endX = i < points.length - 1 ? Math.floor((points[i + 1].x - minX) / (maxX - minX) * width) : width;
-                        var endY = height - Math.floor((point.y - minY) / stepY) - 1;
-
-                        // Draw horizontal line at the current value
-                        ctx.moveTo(startX, startY);
-                        ctx.lineTo(endX, startY);
-                        ctx.stroke();
-
-                        // Draw vertical line to the next data point
-                        ctx.moveTo(endX, startY);
-                        ctx.lineTo(endX, endY);
-                        ctx.stroke();
-
-                        startY = endY; // Update startY for the next data point
+                    if (end > 0) {
+                        drawGrid(ctx);
                     }
 
+                    ctx.save()
+                    ctx.strokeStyle = lineColor;
+                    //ctx.globalAlpha = 0.8;
+                    ctx.lineWidth = lineWidth;
+                    ctx.beginPath();
+                    var x = 0;
+                    var valueSum = 0;
+                    for (var i = 0; i < end; i++) {
+                        valueSum += points[i].y;
+                        var y = height - Math.floor((points[i].y - minY) / stepY) - 1;
+                        if (i == 0) {
+                            ctx.moveTo(x, y);
+                        } else {
+                            ctx.lineTo(x, y);
+                        }
+                        x+=stepX; //point[i].x can be used for grid title
+                    }
+                    ctx.stroke();
                     ctx.restore();
+
+                    if (end > 0) {
+                        var lastValue = valueSum;
+                        if (!root.valueTotal) {
+                            lastValue = points[end-1].y;
+                        }
+                        if (lastValue) {
+                            labelLastValue.text = root.createYLabel(lastValue)+root.axisY.units;
+                        }
+                    }
                 }
             }
 
