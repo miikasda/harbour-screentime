@@ -3,7 +3,6 @@ import Nemo.DBus 2.0
 import Sailfish.Silica 1.0
 import QtQuick.LocalStorage 2.0
 import "../database.js" as DB
-import "../modules/GraphData"
 import ".."
 
 Page {
@@ -18,12 +17,8 @@ Page {
     // Init the database and time labels
     Component.onCompleted: {
         DB.initializeDatabase()
-        var now = new Date();
         LabelData.screenOnToday = DB.getScreenOnTime(new Date())
         LabelData.weeklyAvg = DB.getAverageScreenOnTime(new Date());
-        // Update the graph
-        var todayData = DB.getData(new Date());
-        screenGraph.setPoints(todayData);
     }
 
     // To enable PullDownMenu, place our content in a SilicaFlickable
@@ -71,13 +66,8 @@ Page {
             repeat: true
             running: true
             onTriggered: {
-                // Update todays label data
                 var now = new Date();
                 LabelData.screenOnToday = DB.getScreenOnTime(now);
-                // Update the graph
-                console.log("Minute timer trigger")
-                var todayData = DB.getData(now);
-                screenGraph.setPoints(todayData);
                 // Update the previous 7 day average if the day has changed
                 if (now.toDateString() !== avgUpdated) {
                     console.log("Day changed, recalculating average");
@@ -99,13 +89,6 @@ Page {
             spacing: Theme.paddingMedium
             PageHeader {
                 title: "Screen time"
-            }
-            GraphData {
-                id: screenGraph
-                graphTitle: "Testi"
-                width: parent.width
-                scale: true
-                axisY.units: "On"
             }
             SectionHeader {
                 text: "Durations (HH:MM)"
