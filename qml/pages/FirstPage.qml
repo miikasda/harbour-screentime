@@ -15,18 +15,15 @@ Page {
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
     allowedOrientations: Orientation.All
 
-    function updateGraph() {
-        var todayData = DB.getData(new Date());
-        screenGraph.setPoints(todayData);
-    }
-
     // Init the database and time labels
     Component.onCompleted: {
         DB.initializeDatabase()
         var now = new Date();
         LabelData.screenOnToday = DB.getScreenOnTime(new Date())
         LabelData.weeklyAvg = DB.getAverageScreenOnTime(new Date());
-        updateGraph();
+        // Update the graph
+        var todayData = DB.getData(new Date());
+        screenGraph.setPoints(todayData);
     }
 
     // To enable PullDownMenu, place our content in a SilicaFlickable
@@ -78,8 +75,9 @@ Page {
                 var now = new Date();
                 LabelData.screenOnToday = DB.getScreenOnTime(now);
                 // Update the graph
-                console.log("Minute timer trigger");
-                updateGraph();
+                console.log("Minute timer trigger")
+                var todayData = DB.getData(now);
+                screenGraph.setPoints(todayData);
                 // Update the previous 7 day average if the day has changed
                 if (now.toDateString() !== avgUpdated) {
                     console.log("Day changed, recalculating average");
@@ -121,13 +119,6 @@ Page {
                id: timeOnAvgLabel
                label: "7 previous days average"
                value: LabelData.weeklyAvg
-            }
-        }
-        onVisibleChanged: {
-            if (status === PageStatus.Active & visible) {
-                // Lines are not shown when app is background
-                // redraw the graph when the page is visible again
-                updateGraph();
             }
         }
     }
