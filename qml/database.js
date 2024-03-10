@@ -231,6 +231,78 @@ function getData(date) {
     return data;
 }
 
+function getCumulativeUsage(date) {
+    // Returns cumulative usage in minutes
+    // TODO: Instead of using the getData function make a function which makes the SQL query to get all data for the day
+    //  and use that in here and in getData. This allows us to handle the chart updating for the current session for
+    // both charts. Now we cant add the current session in getData, because it would break the logic in here?
+    // Should this even be used for calculating the screen time? We could get rid of the complex SQL query
+    var data = getData(date);
+    var cumulativeData = []
+    var cumulativeScreenOnTime = 0;
+    var lastTimestamp = null;
+    var lastPoweredState = null;
+    var dataPoint = {
+        x: null,
+        y: null
+    };
+
+    // If the first event of the day has been screen off, we need to add time from midnight up to that point
+    var firstEventOfDay = getFirstEventOfDay(date);
+    if (firstEventOfDay[1] === 0) {
+        var startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
+        var startOfDayToFirstEvent = firstEventOfDay[0] - startOfDay.getTime();
+        cumulativeScreenOnTime += (startOfDayToFirstEvent / 1000) / 60; // Minutes
+        // Add to cumulative data
+        dataPoint = {
+            x: firstEventOfDay[0]/1000,
+            y: cumulativeScreenOnTime
+        };
+        var midnightDataPoint = {
+            x: startOfDay.getTime()/1000,
+            y: 0
+        };
+        cumulativeData.push(midnightDataPoint);
+        cumulativeData.push(dataPoint);
+    }
+
+    for (var i = 0; i < data.length; i++) {
+        var timestamp = data[i].x;
+        var poweredState = data[i].y;
+
+
+        var duration = (timestamp - lastTimestamp);
+        if (poweredState === 0) {
+            cumulativeScreenOnTime += (duration/60); // Add duration to cumulative screen on time
+        }
+
+        lastTimestamp = timestamp;
+        //lastPoweredState = poweredState;
+
+        dataPoint = {
+            x: timestamp,
+            y: cumulativeScreenOnTime
+        };
+        cumulativeData.push(dataPoint);
+    }
+
+    // If last event is screen on, add remaining time until current time
+    if (poweredState === 1) {
+        var currentTimestamp = Date.now() / 1000;
+        var remainingDuration = (currentTimestamp - lastTimestamp) / 60;
+        cumulativeScreenOnTime += remainingDuration;
+        dataPoint = {
+            x: currentTimestamp,
+            y: cumulativeScreenOnTime
+        };
+        cumulativeData.push(dataPoint);
+    }
+
+    return cumulativeData;
+}
+
+
 function insertEvent(event) {
     // Convert event from str to int
     var eventInt

@@ -16,8 +16,10 @@ Page {
     allowedOrientations: Orientation.All
 
     function updateGraph() {
-        var todayData = DB.getData(new Date());
-        screenGraph.setPoints(todayData);
+        var eventData = DB.getData(new Date());
+        screenEventGraph.setPoints(eventData);
+        var cumulativeData = DB.getCumulativeUsage(new Date());
+        screenCumulativeGraph.setPoints(cumulativeData);
     }
 
     // Init the database and time labels
@@ -103,11 +105,20 @@ Page {
                 title: "Screen time"
             }
             GraphData {
-                id: screenGraph
-                graphTitle: "Testi"
+                id: screenEventGraph
+                graphTitle: "Screen events"
                 width: parent.width
                 scale: true
                 axisY.units: "On"
+                flatLines: true
+            }
+            GraphData {
+                id: screenCumulativeGraph
+                graphTitle: "Cumulative usage"
+                width: parent.width
+                scale: true
+                axisY.units: "Min"
+                flatLines: false
             }
             SectionHeader {
                 text: "Durations (HH:MM)"
@@ -126,7 +137,7 @@ Page {
         onVisibleChanged: {
             if (status === PageStatus.Active & visible) {
                 // Lines are not shown when app is background
-                // redraw the graph when the page is visible again
+                // redraw the graphs when the page is visible again
                 updateGraph();
             }
         }

@@ -16,6 +16,7 @@ Item {
 
     property alias clickEnabled: backgroundArea.enabled
     property string graphTitle: ""
+    property bool flatLines: false
 
     property alias axisX: _axisXobject
     Axis {
@@ -229,42 +230,76 @@ Item {
 
                 onPaint: {
                     var ctx = canvas.getContext("2d");
-                    ctx.globalCompositeOperation = "source-over";
-                    ctx.clearRect(0, 0, width, height);
+                    if (flatLines) {
+                        ctx.globalCompositeOperation = "source-over";
+                        ctx.clearRect(0, 0, width, height);
 
-                    // Draw grid lines
-                    drawGrid(ctx);
+                        // Draw grid lines
+                        drawGrid(ctx);
 
-                    // Draw data points
-                    ctx.save();
-                    ctx.strokeStyle = lineColor;
-                    ctx.lineWidth = lineWidth;
-                    ctx.beginPath();
+                        // Draw data points
+                        ctx.save();
+                        ctx.strokeStyle = lineColor;
+                        ctx.lineWidth = lineWidth;
+                        ctx.beginPath();
 
-                    var startX = Math.floor((points[0].x - minX) / (maxX - minX) * width);
-                    var startY = height - Math.floor((points[0].y - minY) / stepY) - 1;
+                        var startX = Math.floor((points[0].x - minX) / (maxX - minX) * width);
+                        var startY = height - Math.floor((points[0].y - minY) / stepY) - 1;
 
-                    for (var i = 1; i < points.length; i++) {
-                        var point = points[i];
-                        var endX = Math.floor((point.x - minX) / (maxX - minX) * width);
-                        var endY = height - Math.floor((point.y - minY) / stepY) - 1;
+                        for (var i = 1; i < points.length; i++) {
+                            var point = points[i];
+                            var endX = Math.floor((point.x - minX) / (maxX - minX) * width);
+                            var endY = height - Math.floor((point.y - minY) / stepY) - 1;
 
-                        // Draw line segment from previous point to current point
+                            // Draw line segment from previous point to current point
+                            ctx.moveTo(startX, startY);
+                            ctx.lineTo(endX, startY);
+                            ctx.stroke();
+
+                            // Draw line segment at the current value level
+                            ctx.moveTo(endX, startY);
+                            ctx.lineTo(endX, endY);
+                            ctx.stroke();
+
+                            // Update start coordinates for the next segment
+                            startX = endX;
+                            startY = endY;
+                        }
+
+                        ctx.restore();
+                    } else {
+                        ctx.globalCompositeOperation = "source-over";
+                        ctx.clearRect(0, 0, width, height);
+
+                        // Draw grid lines
+                        drawGrid(ctx);
+
+                        // Draw data points
+                        ctx.save();
+                        ctx.strokeStyle = lineColor;
+                        ctx.lineWidth = lineWidth;
+                        ctx.beginPath();
+
+                        var startX = Math.floor((points[0].x - minX) / (maxX - minX) * width);
+                        var startY = height - Math.floor((points[0].y - minY) / stepY) - 1;
+
+                        // Move pen to the starting point
                         ctx.moveTo(startX, startY);
-                        ctx.lineTo(endX, startY);
+
+                        for (var i = 1; i < points.length; i++) {
+                            var point = points[i];
+                            var endX = Math.floor((point.x - minX) / (maxX - minX) * width);
+                            var endY = height - Math.floor((point.y - minY) / stepY) - 1;
+
+                            // Draw line segment from previous point to current point
+                            ctx.lineTo(endX, endY);
+                        }
+
+                        // Stroke the entire path at once
                         ctx.stroke();
 
-                        // Draw line segment at the current value level
-                        ctx.moveTo(endX, startY);
-                        ctx.lineTo(endX, endY);
-                        ctx.stroke();
-
-                        // Update start coordinates for the next segment
-                        startX = endX;
-                        startY = endY;
+                        ctx.restore();
                     }
-
-                    ctx.restore();
                 }
             }
 
