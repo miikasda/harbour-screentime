@@ -16,7 +16,8 @@ Page {
     allowedOrientations: Orientation.All
 
     function updateGraph() {
-        var eventData = DB.getData(new Date());
+        console.log("Graph update triggered")
+        var eventData = DB.getPoweredEvents(new Date());
         screenEventGraph.setPoints(eventData);
         var cumulativeData = DB.getCumulativeUsage(new Date());
         screenCumulativeGraph.setPoints(cumulativeData);
@@ -79,9 +80,10 @@ Page {
                 // Update todays label data
                 var now = new Date();
                 LabelData.screenOnToday = DB.getScreenOnTime(now);
-                // Update the graph
-                console.log("Minute timer trigger");
-                updateGraph();
+                // Update the graph if app is active
+                if (status === PageStatus.Active & visible) {
+                    updateGraph();
+                }
                 // Update the previous 7 day average if the day has changed
                 if (now.toDateString() !== avgUpdated) {
                     console.log("Day changed, recalculating average");

@@ -195,8 +195,8 @@ function getAverageScreenOnTime(date) {
 }
 
 function getData(date) {
+    // Returns all data for specific date
     var data = [];
-
     var startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
     var endOfDay = new Date(date);
@@ -205,29 +205,58 @@ function getData(date) {
     db.transaction(
         function(tx) {
             var result = tx.executeSql('SELECT timestamp, powered FROM events WHERE timestamp >= ? AND timestamp <= ?',
-                [startOfDay.getTime(), endOfDay.getTime()]
-            );
-
-            if (result.rows.length > 0) {
-                for (var i = 0; i < result.rows.length; i++) {
-                    var item = result.rows.item(i);
-                    // Convert milliseconds to seconds by dividing by 1000
-                    var timestampInSeconds = item.timestamp / 1000;
-                    var dataPoint = {
-                        x: timestampInSeconds, // Use seconds
-                        y: item.powered
-                    };
-                    data.push(dataPoint);
-                }
-            } else {
-                console.log("No results found");
+                [startOfDay.getTime(), endOfDay.getTime()]);
+            for (var i = 0; i < result.rows.length; i++) {
+                var item = result.rows.item(i);
+                // Convert milliseconds to seconds by dividing by 1000
+                var timestampInSeconds = item.timestamp / 1000;
+                var dataPoint = {
+                    x: timestampInSeconds, // Use seconds
+                    y: item.powered
+                };
+                data.push(dataPoint);
             }
-        },
-        function(error) {
-            console.error("Error executing SQL query: ", error.message);
         }
     );
+    return data
+}
 
+function getPoweredEvents(date) {
+    // Returns all screen on / off events to populate the screenEventGraph
+    var startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    var dataPoint = {
+        x: null,
+        y: null
+    };
+    var data = getData(date);
+
+    // If data length is 0, but graph data is requested for today we know that the screen has been on from startOfDay
+    if (data.length === 0 && date.toDateString() === startOfDay.toDateString()) {
+        dataPoint = {
+            x: startOfDay.getTime() / 1000,
+            y: 1
+        };
+        data.push(dataPoint);
+    }
+    if (data.length > 0) {
+        // If the last event is screen on, add screen on event to now to extend the graph
+        if (data[data.length - 1].y === 1) {
+            dataPoint = {
+                x: Date.now() / 1000,
+                y: 1
+            };
+            data.push(dataPoint);
+        }
+        // If the first event of the day has been screen off, we need to add screen on to start of the day
+        if (data[0].y === 0) {
+            dataPoint = {
+                x: startOfDay.getTime()/1000,
+                y: 1
+            };
+            data.unshift(dataPoint); // Add to start of the array
+        }
+    }
     return data;
 }
 
