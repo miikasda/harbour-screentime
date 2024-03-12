@@ -48,6 +48,8 @@ function getLatestEvent() {
 }
 
 function getFirstEventOfDay(date) {
+    var startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
     var firstEventTimestamp;
     var firstEventPowered;
     db.transaction(
@@ -59,7 +61,7 @@ function getFirstEventOfDay(date) {
                 AND timestamp < ? + 86400000 \
                 ORDER BY timestamp ASC \
                 LIMIT 1',
-                [date.getTime(), date.getTime()]
+                [startOfDay.getTime(), startOfDay.getTime()]
             );
             if (result.rows.length > 0) {
                 firstEventTimestamp = result.rows.item(0).timestamp;
@@ -74,6 +76,8 @@ function getFirstEventOfDay(date) {
 }
 
 function getLastEventForDay(date) {
+    var startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
     var lastEventTimestamp;
     var lastEventPowered;
     db.transaction(
@@ -85,7 +89,7 @@ function getLastEventForDay(date) {
                 AND timestamp < ? + 86400000 \
                 ORDER BY timestamp DESC \
                 LIMIT 1',
-                [date.getTime(), date.getTime()]
+                [startOfDay.getTime(), startOfDay.getTime()]
             );
             if (result.rows.length > 0) {
                 lastEventTimestamp = result.rows.item(0).timestamp;
@@ -100,6 +104,8 @@ function getLastEventForDay(date) {
 }
 
 function getScreenOnTime(date) {
+    // TODO: Consider if this function should also use the getData() and calculate durations in here similar
+    // as in getCumulativeUsage(). We could get rid of the getLastEventForDay() and getFirstEventOfDay()
     var screenOnTime = null;
     date.setHours(0, 0, 0, 0);
     db.transaction(
@@ -262,10 +268,6 @@ function getPoweredEvents(date) {
 
 function getCumulativeUsage(date) {
     // Returns cumulative usage in minutes
-    // TODO: Instead of using the getData function make a function which makes the SQL query to get all data for the day
-    //  and use that in here and in getData. This allows us to handle the chart updating for the current session for
-    // both charts. Now we cant add the current session in getData, because it would break the logic in here?
-    // Should this even be used for calculating the screen time? We could get rid of the complex SQL query
     var data = getData(date);
     var cumulativeData = []
     var cumulativeScreenOnTime = 0;
@@ -275,24 +277,43 @@ function getCumulativeUsage(date) {
         x: null,
         y: null
     };
+    var startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
 
     // If the first event of the day has been screen off, we need to add time from midnight up to that point
-    var firstEventOfDay = getFirstEventOfDay(date);
-    if (firstEventOfDay[1] === 0) {
-        var startOfDay = new Date(date);
-        startOfDay.setHours(0, 0, 0, 0);
-        var startOfDayToFirstEvent = firstEventOfDay[0] - startOfDay.getTime();
-        cumulativeScreenOnTime += (startOfDayToFirstEvent / 1000) / 60; // Minutes
-        // Add to cumulative data
+    if (data.length > 0) {
+        if (data[0].y === 0) {
+            var startOfDayToFirstEvent = data[0].x - (startOfDay.getTime() / 1000);
+            cumulativeScreenOnTime += startOfDayToFirstEvent / 60; // Minutes
+            // Add to cumulative data
+            dataPoint = {
+                x: data[0].x,
+                y: cumulativeScreenOnTime
+            };
+            cumulativeData.unshift(dataPoint); // Push to start of the array
+            // Add midnight as 0
+            dataPoint = {
+                x: startOfDay.getTime()/1000,
+                y: 0
+            };
+            cumulativeData.unshift(dataPoint); // Push to start of the array
+        }
+    } else if (date.toDateString() === startOfDay.toDateString()) {
+        // Data length is 0, and graph data is requested for today we know that the screen has been on from startOfDay
+        var currentTimestamp = Date.now() / 1000;
+        var startOfDayToNow = currentTimestamp - (startOfDay.getTime() / 1000);
+        cumulativeScreenOnTime += startOfDayToNow / 60; // Minutes
+        // Add midnight as 0
         dataPoint = {
-            x: firstEventOfDay[0]/1000,
-            y: cumulativeScreenOnTime
-        };
-        var midnightDataPoint = {
-            x: startOfDay.getTime()/1000,
+            x: startOfDay.getTime() / 1000,
             y: 0
         };
-        cumulativeData.push(midnightDataPoint);
+        cumulativeData.push(dataPoint);
+        // Add time from start of the day to now
+        dataPoint = {
+            x: currentTimestamp,
+            y: cumulativeScreenOnTime
+        };
         cumulativeData.push(dataPoint);
     }
 
@@ -302,7 +323,8 @@ function getCumulativeUsage(date) {
 
 
         var duration = (timestamp - lastTimestamp);
-        if (poweredState === 0) {
+        if (poweredState === 0 && i !== 0) {
+            // Add only if this is not the first event of the day, as this has been already handled and duration is not calculated correctly
             cumulativeScreenOnTime += (duration/60); // Add duration to cumulative screen on time
         }
 
