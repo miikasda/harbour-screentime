@@ -20,10 +20,16 @@ CoverBackground {
         font.pixelSize: Theme.fontSizeHuge
         text: LabelData.screenOnToday
     }
+    DetailItem {
+       anchors.top: timeOnLabel.bottom
+       anchors.horizontalCenter: parent.horizontalCenter
+       label: "Wakes"
+       value: LabelData.wakeCount
+    }
     Label {
         anchors.bottom: timeOnAvgLabel.top
         anchors.horizontalCenter: parent.horizontalCenter
-        text: "7 days avg"
+        text: "7 Days avg"
     }
     Label {
         id: timeOnAvgLabel

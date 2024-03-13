@@ -103,6 +103,31 @@ function getLastEventForDay(date) {
     return [lastEventTimestamp, lastEventPowered];
 }
 
+function getWakeCount(date) {
+    // Returns number of screen wakes for specific date
+    var startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    var endOfDay = new Date(startOfDay.getTime() + 86400000);
+
+    var count = 0;
+    db.transaction(
+        function(tx) {
+            var result = tx.executeSql('\
+                SELECT COUNT(*) as count \
+                FROM events \
+                WHERE timestamp >= ? \
+                AND timestamp < ? \
+                AND powered = 1',
+                [startOfDay.getTime(), endOfDay.getTime()]
+            );
+            if (result.rows.length > 0) {
+                count = result.rows.item(0).count;
+            }
+        }
+    );
+    return count;
+}
+
 function getScreenOnTime(date) {
     // TODO: Consider if this function should also use the getData() and calculate durations in here similar
     // as in getCumulativeUsage(). We could get rid of the getLastEventForDay() and getFirstEventOfDay()
