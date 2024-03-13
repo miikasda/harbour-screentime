@@ -110,7 +110,7 @@ Page {
                 id: screenEventGraph
                 graphTitle: "Screen events"
                 width: parent.width
-                scale: true
+                scale: false
                 axisY.units: "On"
                 flatLines: true
             }

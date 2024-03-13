@@ -75,10 +75,15 @@ Item {
         });
         points = data;
         if (scale) {
-            // Set the y-axis limits no nearest integer
+            // Set the y-axis limits to nearest integer
             maxY = Math.ceil(pointMaxY);
             minY = Math.floor(pointMinY)
+        } else {
+            // Use [0, 1] y-axis interval
+            maxY = 1
+            minY = 0
         }
+
         doubleAxisXLables = ((maxX - minX) > 129600); // 1,5 days
 
         canvas.requestPaint();
