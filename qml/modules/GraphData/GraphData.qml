@@ -75,21 +75,38 @@ Item {
         });
         points = data;
         if (scale) {
-            // Set the y-axis limits no nearest integer
+            // Set the y-axis limits to nearest integer
             maxY = Math.ceil(pointMaxY);
             minY = Math.floor(pointMinY)
+        } else {
+            // Use [0, 1] y-axis interval
+            maxY = 1
+            minY = 0
         }
+
         doubleAxisXLables = ((maxX - minX) > 129600); // 1,5 days
 
         canvas.requestPaint();
     }
 
     function createYLabel(value) {
-        var v = value;
-        if (valueConverter) {
-            v = valueConverter(value);
+        if (!scale) {
+            // Labels for screenEventGraph
+            if (value === 1) {
+                return "On";
+            } else if (value === 0) {
+                return "Off";
+            } else {
+                return "";
+            }
+        } else {
+            // Labels for screenCumulativeGraph
+            var v = value;
+            if (valueConverter) {
+                v = valueConverter(value);
+            }
+            return axisY.mask.arg(v);
         }
-        return axisY.mask.arg(v);
     }
 
     function createXLabel(value) {
