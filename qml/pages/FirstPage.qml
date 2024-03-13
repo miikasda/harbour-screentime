@@ -111,7 +111,7 @@ Page {
                 graphTitle: "Screen events"
                 width: parent.width
                 scale: false
-                axisY.units: "On"
+                axisY.units: ""
                 flatLines: true
             }
             GraphData {
@@ -119,7 +119,7 @@ Page {
                 graphTitle: "Cumulative usage"
                 width: parent.width
                 scale: true
-                axisY.units: "Min"
+                axisY.units: "Minutes"
                 flatLines: false
             }
             SectionHeader {

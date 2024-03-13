@@ -90,11 +90,23 @@ Item {
     }
 
     function createYLabel(value) {
-        var v = value;
-        if (valueConverter) {
-            v = valueConverter(value);
+        if (!scale) {
+            // Labels for screenEventGraph
+            if (value === 1) {
+                return "On";
+            } else if (value === 0) {
+                return "Off";
+            } else {
+                return "";
+            }
+        } else {
+            // Labels for screenCumulativeGraph
+            var v = value;
+            if (valueConverter) {
+                v = valueConverter(value);
+            }
+            return axisY.mask.arg(v);
         }
-        return axisY.mask.arg(v);
     }
 
     function createXLabel(value) {
