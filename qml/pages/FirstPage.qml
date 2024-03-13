@@ -29,6 +29,7 @@ Page {
         var now = new Date();
         LabelData.screenOnToday = DB.getScreenOnTime(new Date())
         LabelData.weeklyAvg = DB.getAverageScreenOnTime(new Date());
+        LabelData.wakeCount = DB.getWakeCount(new Date());
         updateGraph();
     }
 
@@ -65,6 +66,9 @@ Page {
                             console.log('Display status changed to', result);
                             DB.insertEvent(result);
                             displayStatus = result;
+                            if (result === "on") {
+                                LabelData.wakeCount += 1;
+                            }
                         }
                     }
                 });
@@ -84,11 +88,12 @@ Page {
                 if (status === PageStatus.Active & visible) {
                     updateGraph();
                 }
-                // Update the previous 7 day average if the day has changed
+                // Update the previous 7 day average and wake count if the day has changed
                 if (now.toDateString() !== avgUpdated) {
-                    console.log("Day changed, recalculating average");
+                    console.log("Day changed, recalculating average and wakeCount");
                     avgUpdated = now.toDateString();
                     LabelData.weeklyAvg = DB.getAverageScreenOnTime(now);
+                    LabelData.wakeCount = DB.getWakeCount(new Date());
                 }
             }
         }
@@ -108,7 +113,7 @@ Page {
             }
             GraphData {
                 id: screenEventGraph
-                graphTitle: "Screen events"
+                graphTitle: "Screen status"
                 width: parent.width
                 scale: false
                 axisY.units: ""
@@ -134,6 +139,14 @@ Page {
                id: timeOnAvgLabel
                label: "7 previous days average"
                value: LabelData.weeklyAvg
+            }
+            SectionHeader {
+                text: "Other"
+            }
+            DetailItem {
+               id: wakeCountLabel
+               label: "Screen wakes today"
+               value: LabelData.wakeCount
             }
         }
         onVisibleChanged: {
