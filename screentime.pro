@@ -19,6 +19,8 @@ DISTFILES += qml/screentime.qml \
     qml/database.js \
     qml/qmldir \
     qml/LabelData.qml \
+    qml/modules/GraphData/Axis.qml \
+    qml/modules/GraphData/GraphData.qml \
     qml/pages/FirstPage.qml \
     qml/pages/SecondPage.qml \
     rpm/screentime.changes.in \

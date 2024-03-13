@@ -48,6 +48,8 @@ function getLatestEvent() {
 }
 
 function getFirstEventOfDay(date) {
+    var startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
     var firstEventTimestamp;
     var firstEventPowered;
     db.transaction(
@@ -59,7 +61,7 @@ function getFirstEventOfDay(date) {
                 AND timestamp < ? + 86400000 \
                 ORDER BY timestamp ASC \
                 LIMIT 1',
-                [date.getTime(), date.getTime()]
+                [startOfDay.getTime(), startOfDay.getTime()]
             );
             if (result.rows.length > 0) {
                 firstEventTimestamp = result.rows.item(0).timestamp;
@@ -74,6 +76,8 @@ function getFirstEventOfDay(date) {
 }
 
 function getLastEventForDay(date) {
+    var startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
     var lastEventTimestamp;
     var lastEventPowered;
     db.transaction(
@@ -85,7 +89,7 @@ function getLastEventForDay(date) {
                 AND timestamp < ? + 86400000 \
                 ORDER BY timestamp DESC \
                 LIMIT 1',
-                [date.getTime(), date.getTime()]
+                [startOfDay.getTime(), startOfDay.getTime()]
             );
             if (result.rows.length > 0) {
                 lastEventTimestamp = result.rows.item(0).timestamp;
@@ -100,6 +104,8 @@ function getLastEventForDay(date) {
 }
 
 function getScreenOnTime(date) {
+    // TODO: Consider if this function should also use the getData() and calculate durations in here similar
+    // as in getCumulativeUsage(). We could get rid of the getLastEventForDay() and getFirstEventOfDay()
     var screenOnTime = null;
     date.setHours(0, 0, 0, 0);
     db.transaction(
@@ -193,6 +199,160 @@ function getAverageScreenOnTime(date) {
         return secondsToString(averageScreenOnTime);
     }
 }
+
+function getData(date) {
+    // Returns all data for specific date
+    var data = [];
+    var startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    var endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    db.transaction(
+        function(tx) {
+            var result = tx.executeSql('SELECT timestamp, powered FROM events WHERE timestamp >= ? AND timestamp <= ?',
+                [startOfDay.getTime(), endOfDay.getTime()]);
+            for (var i = 0; i < result.rows.length; i++) {
+                var item = result.rows.item(i);
+                // Convert milliseconds to seconds by dividing by 1000
+                var timestampInSeconds = item.timestamp / 1000;
+                var dataPoint = {
+                    x: timestampInSeconds, // Use seconds
+                    y: item.powered
+                };
+                data.push(dataPoint);
+            }
+        }
+    );
+    return data
+}
+
+function getPoweredEvents(date) {
+    // Returns all screen on / off events to populate the screenEventGraph
+    var startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    var dataPoint = {
+        x: null,
+        y: null
+    };
+    var data = getData(date);
+
+    // If data length is 0, but graph data is requested for today we know that the screen has been on from startOfDay
+    if (data.length === 0 && date.toDateString() === startOfDay.toDateString()) {
+        dataPoint = {
+            x: startOfDay.getTime() / 1000,
+            y: 1
+        };
+        data.push(dataPoint);
+    }
+    if (data.length > 0) {
+        // If the last event is screen on, add screen on event to now to extend the graph
+        if (data[data.length - 1].y === 1) {
+            dataPoint = {
+                x: Date.now() / 1000,
+                y: 1
+            };
+            data.push(dataPoint);
+        }
+        // If the first event of the day has been screen off, we need to add screen on to start of the day
+        if (data[0].y === 0) {
+            dataPoint = {
+                x: startOfDay.getTime()/1000,
+                y: 1
+            };
+            data.unshift(dataPoint); // Add to start of the array
+        }
+    }
+    return data;
+}
+
+function getCumulativeUsage(date) {
+    // Returns cumulative usage in minutes
+    var data = getData(date);
+    var cumulativeData = []
+    var cumulativeScreenOnTime = 0;
+    var lastTimestamp = null;
+    var lastPoweredState = null;
+    var dataPoint = {
+        x: null,
+        y: null
+    };
+    var startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    // If the first event of the day has been screen off, we need to add time from midnight up to that point
+    if (data.length > 0) {
+        if (data[0].y === 0) {
+            var startOfDayToFirstEvent = data[0].x - (startOfDay.getTime() / 1000);
+            cumulativeScreenOnTime += startOfDayToFirstEvent / 60; // Minutes
+            // Add to cumulative data
+            dataPoint = {
+                x: data[0].x,
+                y: cumulativeScreenOnTime
+            };
+            cumulativeData.unshift(dataPoint); // Push to start of the array
+            // Add midnight as 0
+            dataPoint = {
+                x: startOfDay.getTime()/1000,
+                y: 0
+            };
+            cumulativeData.unshift(dataPoint); // Push to start of the array
+        }
+    } else if (date.toDateString() === startOfDay.toDateString()) {
+        // Data length is 0, and graph data is requested for today we know that the screen has been on from startOfDay
+        var currentTimestamp = Date.now() / 1000;
+        var startOfDayToNow = currentTimestamp - (startOfDay.getTime() / 1000);
+        cumulativeScreenOnTime += startOfDayToNow / 60; // Minutes
+        // Add midnight as 0
+        dataPoint = {
+            x: startOfDay.getTime() / 1000,
+            y: 0
+        };
+        cumulativeData.push(dataPoint);
+        // Add time from start of the day to now
+        dataPoint = {
+            x: currentTimestamp,
+            y: cumulativeScreenOnTime
+        };
+        cumulativeData.push(dataPoint);
+    }
+
+    for (var i = 0; i < data.length; i++) {
+        var timestamp = data[i].x;
+        var poweredState = data[i].y;
+
+
+        var duration = (timestamp - lastTimestamp);
+        if (poweredState === 0 && i !== 0) {
+            // Add only if this is not the first event of the day, as this has been already handled and duration is not calculated correctly
+            cumulativeScreenOnTime += (duration/60); // Add duration to cumulative screen on time
+        }
+
+        lastTimestamp = timestamp;
+        //lastPoweredState = poweredState;
+
+        dataPoint = {
+            x: timestamp,
+            y: cumulativeScreenOnTime
+        };
+        cumulativeData.push(dataPoint);
+    }
+
+    // If last event is screen on, add remaining time until current time
+    if (poweredState === 1) {
+        var currentTimestamp = Date.now() / 1000;
+        var remainingDuration = (currentTimestamp - lastTimestamp) / 60;
+        cumulativeScreenOnTime += remainingDuration;
+        dataPoint = {
+            x: currentTimestamp,
+            y: cumulativeScreenOnTime
+        };
+        cumulativeData.push(dataPoint);
+    }
+
+    return cumulativeData;
+}
+
 
 function insertEvent(event) {
     // Convert event from str to int

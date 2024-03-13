@@ -3,6 +3,7 @@ import Nemo.DBus 2.0
 import Sailfish.Silica 1.0
 import QtQuick.LocalStorage 2.0
 import "../database.js" as DB
+import "../modules/GraphData"
 import ".."
 
 Page {
@@ -14,11 +15,21 @@ Page {
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
     allowedOrientations: Orientation.All
 
+    function updateGraph() {
+        console.log("Graph update triggered")
+        var eventData = DB.getPoweredEvents(new Date());
+        screenEventGraph.setPoints(eventData);
+        var cumulativeData = DB.getCumulativeUsage(new Date());
+        screenCumulativeGraph.setPoints(cumulativeData);
+    }
+
     // Init the database and time labels
     Component.onCompleted: {
         DB.initializeDatabase()
+        var now = new Date();
         LabelData.screenOnToday = DB.getScreenOnTime(new Date())
         LabelData.weeklyAvg = DB.getAverageScreenOnTime(new Date());
+        updateGraph();
     }
 
     // To enable PullDownMenu, place our content in a SilicaFlickable
@@ -66,8 +77,13 @@ Page {
             repeat: true
             running: true
             onTriggered: {
+                // Update todays label data
                 var now = new Date();
                 LabelData.screenOnToday = DB.getScreenOnTime(now);
+                // Update the graph if app is active
+                if (status === PageStatus.Active & visible) {
+                    updateGraph();
+                }
                 // Update the previous 7 day average if the day has changed
                 if (now.toDateString() !== avgUpdated) {
                     console.log("Day changed, recalculating average");
@@ -90,6 +106,22 @@ Page {
             PageHeader {
                 title: "Screen time"
             }
+            GraphData {
+                id: screenEventGraph
+                graphTitle: "Screen events"
+                width: parent.width
+                scale: true
+                axisY.units: "On"
+                flatLines: true
+            }
+            GraphData {
+                id: screenCumulativeGraph
+                graphTitle: "Cumulative usage"
+                width: parent.width
+                scale: true
+                axisY.units: "Min"
+                flatLines: false
+            }
             SectionHeader {
                 text: "Durations (HH:MM)"
             }
@@ -102,6 +134,13 @@ Page {
                id: timeOnAvgLabel
                label: "7 previous days average"
                value: LabelData.weeklyAvg
+            }
+        }
+        onVisibleChanged: {
+            if (status === PageStatus.Active & visible) {
+                // Lines are not shown when app is background
+                // redraw the graphs when the page is visible again
+                updateGraph();
             }
         }
     }
