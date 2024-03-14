@@ -132,7 +132,8 @@ function getScreenOnTime(date) {
     // TODO: Consider if this function should also use the getData() and calculate durations in here similar
     // as in getCumulativeUsage(). We could get rid of the getLastEventForDay() and getFirstEventOfDay()
     var screenOnTime = null;
-    date.setHours(0, 0, 0, 0);
+    var startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
     db.transaction(
         function(tx) {
             var result = tx.executeSql('\
@@ -161,14 +162,14 @@ function getScreenOnTime(date) {
                         AND timestamp >= ? \
                         AND timestamp < ? + 86400000 /* 24 hours in milliseconds */ \
                 )',
-                [date.getTime(), date.getTime(), date.getTime(), date.getTime()]
+                [startOfDay.getTime(), startOfDay.getTime(), startOfDay.getTime(), startOfDay.getTime()]
             );
             screenOnTime = result.rows.item(0).total_screen_on;
         }
     );
     // If the screen is now on, and we are calculating for today we need to add time from start of this session to now
     var latestValues = getLatestEvent()
-    if (latestValues[1] === 1 && date.getTime() === new Date().setHours(0, 0, 0, 0)) {
+    if (latestValues[1] === 1 && startOfDay.getTime() === new Date().setHours(0, 0, 0, 0)) {
         // Cap session length to max todays length and add it to summed earlier sessions
         var now = new Date().getTime()
         var currSessionLength = Math.min((now-date.getTime()), (now-latestValues[0]));
@@ -177,7 +178,7 @@ function getScreenOnTime(date) {
     // If the last event for day has been "on", and the day is not today,
     // we need to add duration from that untill midnight
     var lastEventForDay = getLastEventForDay(date);
-    if (lastEventForDay[1] === 1 && date.getTime() !== new Date().setHours(0, 0, 0, 0)) {
+    if (lastEventForDay[1] === 1 && startOfDay.getTime() !== new Date().setHours(0, 0, 0, 0)) {
         var midnight = date.getTime() + 86400000; // Next day midnight
         var durationUntilMidnight = midnight - lastEventForDay[0];
         screenOnTime = screenOnTime + (durationUntilMidnight / 1000);
@@ -198,15 +199,16 @@ function getScreenOnTime(date) {
 
 function getAverageScreenOnTime(date) {
     // Calculates the average screen on time for previous 7 days starting from parameter date
-    date.setHours(0, 0, 0, 0);
+    var startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
     var totalScreenOnTime = 0;
     var numberOfDays = 0;
     var hours;
     var minutes;
     // Iterate over the previous 7 days
     for (var i = 0; i < 7; i++) {
-        date.setDate(date.getDate() - 1);
-        var screenOnTime = getScreenOnTime(date);
+        startOfDay.setDate(startOfDay.getDate() - 1);
+        var screenOnTime = getScreenOnTime(startOfDay);
         // If screenOnTime is not null (meaning there is data for that day), accumulate total and increment days
         if (screenOnTime !== null) {
             var parts = screenOnTime.split(":");

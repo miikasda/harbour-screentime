@@ -26,12 +26,17 @@ Page {
     // Init the database and time labels
     Component.onCompleted: {
         DB.initializeDatabase()
-        var now = new Date();
         LabelData.screenOnToday = DB.getScreenOnTime(new Date())
         LabelData.weeklyAvg = DB.getAverageScreenOnTime(new Date());
         LabelData.wakeCount = DB.getWakeCount(new Date());
         updateGraph();
     }
+
+    // Date picker component
+    Component {
+             id: datePicker
+             DatePickerDialog {}
+   }
 
     // To enable PullDownMenu, place our content in a SilicaFlickable
     SilicaFlickable {
@@ -40,8 +45,19 @@ Page {
         // PullDownMenu and PushUpMenu must be declared in SilicaFlickable, SilicaListView or SilicaGridView
         PullDownMenu {
             MenuItem {
-                text: "Show Page 2"
-                onClicked: pageStack.animatorPush(Qt.resolvedUrl("SecondPage.qml"))
+                text: "Select Date"
+                onClicked: {
+                    var dialog = pageStack.push(datePicker, {
+                    })
+                    dialog.accepted.connect(function() {
+                        pageStack.push(
+                           Qt.resolvedUrl("HistoryPage.qml"),
+                           {
+                              date: dialog.date
+                           }
+                       );
+                    })
+                }
             }
         }
 
@@ -109,7 +125,7 @@ Page {
             width: page.width
             spacing: Theme.paddingMedium
             PageHeader {
-                title: "Screen time"
+                title: "Screen Time"
             }
             GraphData {
                 id: screenEventGraph
