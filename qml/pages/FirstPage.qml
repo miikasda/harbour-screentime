@@ -23,9 +23,14 @@ Page {
         screenCumulativeGraph.setPoints(cumulativeData);
     }
 
-    // Init the database and time labels
+    // Init the database, settings and get data
     Component.onCompleted: {
         DB.initializeDatabase()
+        // Get settings
+        LabelData.showScreenOn = DB.getSetting("showScreenOn");
+        LabelData.showAverage = DB.getSetting("showAverage");
+        LabelData.showWakeCount = DB.getSetting("showWakeCount");
+        // Get data
         LabelData.screenOnToday = DB.getScreenOnTime(new Date())
         LabelData.weeklyAvg = DB.getAverageScreenOnTime(new Date());
         LabelData.wakeCount = DB.getWakeCount(new Date());
@@ -44,6 +49,12 @@ Page {
 
         // PullDownMenu and PushUpMenu must be declared in SilicaFlickable, SilicaListView or SilicaGridView
         PullDownMenu {
+            MenuItem {
+                text: "Settings"
+                onClicked: {
+                    pageStack.push(Qt.resolvedUrl("SettingsPage.qml"));
+                }
+            }
             MenuItem {
                 text: "Select Date"
                 onClicked: {

@@ -23,6 +23,7 @@ DISTFILES += qml/screentime.qml \
     qml/modules/GraphData/GraphData.qml \
     qml/pages/FirstPage.qml \
     qml/pages/HistoryPage.qml \
+    qml/pages/SettingsPage.qml \
     qml/pages/SecondPage.qml \
     rpm/screentime.changes.in \
     rpm/screentime.changes.run.in \
