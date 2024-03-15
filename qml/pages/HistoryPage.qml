@@ -31,7 +31,7 @@ Page {
         width: page.width
         spacing: Theme.paddingMedium
         PageHeader {
-            title: date
+            title: date.toLocaleDateString(Qt.locale())
         }
         GraphData {
             id: screenEventGraph
