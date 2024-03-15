@@ -6,6 +6,14 @@ function initializeDatabase() {
             tx.executeSql('CREATE TABLE IF NOT EXISTS events(timestamp INT, powered INT)');
         }
     );
+    db.transaction(
+        function(tx) {
+            tx.executeSql('CREATE TABLE IF NOT EXISTS settings(setting TEXT UNIQUE  , value INT)');
+            tx.executeSql('INSERT OR IGNORE INTO settings (setting, value) VALUES (?, ?)', ['showScreenOn', 1]);
+            tx.executeSql('INSERT OR IGNORE INTO settings (setting, value) VALUES (?, ?)', ['showWakeCount', 1]);
+            tx.executeSql('INSERT OR IGNORE INTO settings (setting, value) VALUES (?, ?)', ['showAverage', 1]);
+        }
+    );
     // Check if the latest event is "on" when initializing DB
     // This means the app has not closed succesfully last time and we need to fix the DB
     var latestValues = getLatestEvent();
@@ -27,6 +35,23 @@ function secondsToString(seconds) {
     var formattedHours = hours < 10 ? "0" + hours : hours;
     var formattedMinutes = minutes < 10 ? "0" + minutes : minutes;
     return formattedHours + ":" + formattedMinutes;
+}
+
+function getSetting(setting) {
+    var value = null;
+    db.transaction(function(tx) {
+        var resultSet = tx.executeSql('SELECT value FROM settings WHERE setting = ?', [setting]);
+        if (resultSet.rows.length > 0) {
+            value = resultSet.rows.item(0).value;
+        }
+    });
+    return value;
+}
+
+function setSettingValue(setting, value) {
+    db.transaction(function(tx) {
+        tx.executeSql('INSERT OR REPLACE INTO settings (setting, value) VALUES (?, ?)', [setting, value]);
+    });
 }
 
 function getLatestEvent() {
