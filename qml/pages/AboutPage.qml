@@ -4,7 +4,7 @@ import "../modules/Opal/About" as A
 
 A.AboutPageBase {
     appName: "Screen Time"
-    appIcon: Qt.resolvedUrl("../../icons/172x172/screentime.png")
+    appIcon: Qt.resolvedUrl("../screentime-icon.png")
     appVersion: "1.0.0"
     description: "Application to track screen time usage"
     authors: "Miika Malin"
