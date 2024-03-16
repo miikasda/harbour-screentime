@@ -21,6 +21,7 @@ DISTFILES += qml/screentime.qml \
     qml/LabelData.qml \
     qml/modules/GraphData/Axis.qml \
     qml/modules/GraphData/GraphData.qml \
+    qml/pages/AboutPage.qml \
     qml/pages/FirstPage.qml \
     qml/pages/HistoryPage.qml \
     qml/pages/SettingsPage.qml \

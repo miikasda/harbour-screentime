@@ -1,7 +1,7 @@
 Name:       screentime
 
 Summary:    Application to track screen time usage
-Version:    0.1.0
+Version:    1.0.0
 Release:    1
 License:    LICENSE
 BuildArch:  noarch
@@ -13,6 +13,8 @@ BuildRequires:  pkgconfig(sailfishapp) >= 1.0.3
 BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(Qt5Qml)
 BuildRequires:  pkgconfig(Qt5Quick)
+BuildRequires:  pkgconfig(Qt5DBus)
+BuildRequires:  pkgconfig(Qt5Sql)
 BuildRequires:  desktop-file-utils
 
 %description
@@ -41,3 +43,8 @@ desktop-file-install --delete-original         --dir %{buildroot}%{_datadir}/app
 %{_datadir}/%{name}
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
+
+# This block is needed for Opal not to provide anything which is not allowed in harbour
+# >> macros
+%define __provides_exclude_from ^%{_datadir}/.*$
+# << macros
