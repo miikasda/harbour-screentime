@@ -10,11 +10,11 @@
 #   - translation filenames have to be changed
 
 # The name of your application
-TARGET = screentime
+TARGET = harbour-screentime
 
 CONFIG += sailfishapp_qml
 
-DISTFILES += qml/screentime.qml \
+DISTFILES += qml/harbour-screentime.qml \
     qml/cover/CoverPage.qml \
     qml/database.js \
     qml/qmldir \
@@ -26,10 +26,8 @@ DISTFILES += qml/screentime.qml \
     qml/pages/HistoryPage.qml \
     qml/pages/SettingsPage.qml \
     qml/pages/SecondPage.qml \
-    rpm/screentime.changes.in \
-    rpm/screentime.changes.run.in \
-    rpm/screentime.spec \
-    screentime.desktop
+    rpm/harbour-screentime.spec \
+    harbour-screentime.desktop
 
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172
 
