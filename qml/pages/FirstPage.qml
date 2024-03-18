@@ -120,7 +120,7 @@ Page {
                 LabelData.screenOnToday = DB.getScreenOnTime(now);
                 // Update the graph if app is active
                 if (status === PageStatus.Active & visible) {
-                    updateGraph();
+                    updateGraph(now);
                 }
                 // Update the previous 7 day average and wake count if the day has changed
                 if (now.toDateString() !== avgUpdated) {
