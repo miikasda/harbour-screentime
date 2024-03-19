@@ -15,11 +15,11 @@ Page {
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
     allowedOrientations: Orientation.All
 
-    function updateGraph() {
+    function updateGraph(date) {
         console.log("Graph update triggered")
-        var eventData = DB.getPoweredEvents(new Date());
+        var eventData = DB.getPoweredEvents(date);
         screenEventGraph.setPoints(eventData);
-        var cumulativeData = DB.getCumulativeUsage(new Date());
+        var cumulativeData = DB.getCumulativeUsage(date);
         screenCumulativeGraph.setPoints(cumulativeData);
     }
 
@@ -31,10 +31,11 @@ Page {
         LabelData.showAverage = DB.getSetting("showAverage");
         LabelData.showWakeCount = DB.getSetting("showWakeCount");
         // Get data
-        LabelData.screenOnToday = DB.getScreenOnTime(new Date())
-        LabelData.weeklyAvg = DB.getAverageScreenOnTime(new Date());
-        LabelData.wakeCount = DB.getWakeCount(new Date());
-        updateGraph();
+        var now = new Date();
+        LabelData.screenOnToday = DB.getScreenOnTime(now)
+        LabelData.weeklyAvg = DB.getAverageScreenOnTime(now);
+        LabelData.wakeCount = DB.getWakeCount(now);
+        updateGraph(now);
     }
 
     // Date picker component
@@ -119,14 +120,14 @@ Page {
                 LabelData.screenOnToday = DB.getScreenOnTime(now);
                 // Update the graph if app is active
                 if (status === PageStatus.Active & visible) {
-                    updateGraph();
+                    updateGraph(now);
                 }
                 // Update the previous 7 day average and wake count if the day has changed
                 if (now.toDateString() !== avgUpdated) {
                     console.log("Day changed, recalculating average and wakeCount");
                     avgUpdated = now.toDateString();
                     LabelData.weeklyAvg = DB.getAverageScreenOnTime(now);
-                    LabelData.wakeCount = DB.getWakeCount(new Date());
+                    LabelData.wakeCount = DB.getWakeCount(now);
                 }
             }
         }
@@ -186,7 +187,8 @@ Page {
             if (status === PageStatus.Active & visible) {
                 // Lines are not shown when app is background
                 // redraw the graphs when the page is visible again
-                updateGraph();
+                var now = new Date();
+                updateGraph(now);
             }
         }
     }

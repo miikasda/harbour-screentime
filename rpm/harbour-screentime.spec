@@ -1,4 +1,4 @@
-Name:       screentime
+Name:       harbour-screentime
 
 Summary:    Application to track screen time usage
 Version:    1.0.0
@@ -18,8 +18,30 @@ BuildRequires:  pkgconfig(Qt5Sql)
 BuildRequires:  desktop-file-utils
 
 %description
-Application to track screen time usage
+Screen Time is the app to track screen time usage and monitor your digital wellbeing on
+Sailfish OS. Your privacy is protected, with all data securely stored on-device in an
+SQLite database. Easily monitor usage and access historical data.
 
+Note: Keep the app running in the background for continuous screen usage monitoring.
+
+# This section includes metadata for SailfishOS:Chum, see
+# https://github.com/sailfishos-chum/main/blob/main/Metadata.md
+%if 0%{?_chum}
+Title: Screen Time
+Type: desktop-application
+DeveloperName: Miika Malin
+Categories:
+ - System
+Custom:
+  Repo: https://github.com/miikasda/harbour-screentime
+PackageIcon: https://github.com/miikasda/harbour-screentime/raw/main/icons/172x172/harbour-screentime.png
+Screenshots:
+ - https://github.com/miikasda/harbour-screentime/raw/main/screenshots/mainScreen.png
+Links:
+  Homepage: https://github.com/miikasda/harbour-screentime
+  Bugtracker: https://github.com/miikasda/harbour-screentime/issues
+  Donation: https://github.com/sponsors/miikasda
+%endif
 
 %prep
 %setup -q -n %{name}-%{version}

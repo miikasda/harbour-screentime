@@ -1,9 +1,9 @@
 [Desktop Entry]
 Type=Application
 X-Nemo-Application-Type=silica-qt5
-Icon=screentime
-Exec=sailfish-qml screentime
-Name=Screentime
+Icon=harbour-screentime
+Exec=sailfish-qml harbour-screentime
+Name=Screen Time
 # translation example:
 # your app name in German locale (de)
 #
@@ -15,6 +15,6 @@ Name=Screentime
 # Replace with your organization as a reverse domain name
 OrganizationName=org.malmi
 # ApplicationName does not have to be identical to Name
-ApplicationName=screentime
+ApplicationName=harbour-screentime
 # Add the required permissions here
 Permissions=
