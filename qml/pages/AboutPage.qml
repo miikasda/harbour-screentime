@@ -13,7 +13,7 @@ A.AboutPageBase {
         // add new entries at the top
         A.ChangelogItem {
             version: "v1.0.0"
-            date: "2024-03-16"
+            date: "2024-03-19"
             paragraphs: "Initial release"
         }
     ]
