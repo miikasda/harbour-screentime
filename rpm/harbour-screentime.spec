@@ -1,11 +1,11 @@
 Name:       harbour-screentime
 
 Summary:    Application to track screen time usage
-Version:    1.0.0
+Version:    1.0.1
 Release:    1
-License:    LICENSE
+License:    GPLv3
 BuildArch:  noarch
-URL:        http://example.org/
+URL:        https://github.com/miikasda/harbour-screentime
 Source0:    %{name}-%{version}.tar.bz2
 Requires:   sailfishsilica-qt5 >= 0.10.9
 Requires:   libsailfishapp-launcher
