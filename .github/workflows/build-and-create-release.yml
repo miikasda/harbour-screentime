@@ -50,7 +50,7 @@ jobs:
       - name: Initialize RPM building
         id: init
         run: docker pull coderus/sailfishos-platform-sdk:$sfos_version && mkdir RPMS
-      - name: Build aarch64
+      - name: Build
         id: build_aarch64
         uses: coderus/github-sfos-build@master
         with:
