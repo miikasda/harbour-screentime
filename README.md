@@ -13,6 +13,20 @@ Screen Time is the app to track screen time usage and monitor your digital wellb
     <img src="screenshots/mainScreen.png?" width="400">
 </p>
 
+## Automatic launch with Partnerspace
+
+The app can be configured to run continuously in the background and automatically launch using Partnerspace. Access the app in Partnerspace by swiping left on your home screen.
+
+### Enabling Partnerspace for Screen Time:
+```
+dconf write /desktop/lipstick-jolla-home/partnerspace/applications "['/usr/share/applications/harbour-screentime.desktop']"
+```
+
+### Disabling Partnerspace
+```
+dconf write /desktop/lipstick-jolla-home/partnerspace/applications "@as []"
+```
+
 ## Acknowledgements
 
 Screen Time uses slightly modified version of graphs from [systemmonitor](https://github.com/custodian/harbour-systemmonitor), and about page has been done by using [Opal](https://github.com/Pretty-SFOS/opal-about).
