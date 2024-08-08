@@ -58,7 +58,7 @@ jobs:
           arch: aarch64
       - name: Upload build result
         id: upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: rpm-build-result
           path: RPMS
@@ -71,12 +71,12 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Download RPMs
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: rpm-build-result
       - name: Create a release
         id: release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: '*.rpm'
           draft: false
