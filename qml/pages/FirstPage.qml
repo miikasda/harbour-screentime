@@ -79,33 +79,25 @@ Page {
             }
         }
 
-        // Check the screen state every second
+        // Listen to display_status_ind for screen events
         DBusInterface {
-            id: mce
-
             bus: DBus.SystemBus
             service: 'com.nokia.mce'
-            iface: 'com.nokia.mce.request'
-            path: '/com/nokia/mce/request'
-        }
-        Timer {
-            interval: 1000 // Check every 1000 milliseconds (1 second)
-            repeat: true
-            running: true
+            iface: 'com.nokia.mce.signal'
+            path: '/com/nokia/mce/signal'
+            signalsEnabled: true
 
-            onTriggered: {
-                mce.typedCall('get_display_status', [], function (result) {
-                    if(displayStatus !== result){
-                        if (result === "on" || result === "off") {
-                            console.log('Display status changed to', result);
-                            DB.insertEvent(result);
-                            displayStatus = result;
-                            if (result === "on") {
-                                LabelData.wakeCount += 1;
-                            }
+            function display_status_ind(event) {
+                if(displayStatus !== event){
+                    if (event === "on" || event === "off") {
+                        console.log('Display status changed to', event);
+                        DB.insertEvent(event);
+                        displayStatus = event;
+                        if (event === "on") {
+                            LabelData.wakeCount += 1;
                         }
                     }
-                });
+                }
             }
         }
 
