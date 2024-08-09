@@ -5,12 +5,17 @@ import "../modules/Opal/About" as A
 A.AboutPageBase {
     appName: "Screen Time"
     appIcon: Qt.resolvedUrl("../screentime-icon.png")
-    appVersion: "1.0.1"
+    appVersion: "1.0.2"
     description: "Application to track screen time usage"
     authors: "Miika Malin"
     licenses: A.License { spdxId: "GPL-3.0-or-later" }
     changelogItems: [
         // add new entries at the top
+        A.ChangelogItem {
+            version: "v1.0.2"
+            date: "2024-08-09"
+            paragraphs: "Improve efficiency when getting screen status"
+        },
         A.ChangelogItem {
             version: "v1.0.1"
             date: "2024-03-20"

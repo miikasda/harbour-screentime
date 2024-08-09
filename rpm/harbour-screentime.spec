@@ -1,7 +1,7 @@
 Name:       harbour-screentime
 
 Summary:    Application to track screen time usage
-Version:    1.0.1
+Version:    1.0.2
 Release:    1
 License:    GPLv3
 BuildArch:  noarch
